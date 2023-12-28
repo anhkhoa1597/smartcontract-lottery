@@ -6,7 +6,7 @@ const { EventLog } = require("ethers")
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("Raffle Unit Tests", function () {
-          let raffle,  raffleContract, vrfCoordinatorV2Mock, raffleEntranceFee, interval, player //  deployer
+          let raffle, raffleContract, vrfCoordinatorV2Mock, raffleEntranceFee, interval, player //  deployer
           const chainId = network.config.chainId
           beforeEach(async () => {
               accounts = await ethers.getSigners()
