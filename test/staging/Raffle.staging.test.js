@@ -31,41 +31,24 @@ developmentChains.includes(network.name)
                           console.log("WinnerPicked event fired!")
                           try {
                               // add our asserts here
-                              console.log("raffle: ", raffle)
                               const recentWinner = await raffle.getRecentWinner()
-                              console.log("recentWinner: ", recentWinner)
                               const raffleState = await raffle.getRaffleState()
-                              console.log("raffleState: ", raffleState)
 
                               const winnerEndingBalance = await accounts[0].provider.getBalance(
                                   accountAddress
                               )
-                              console.log("winnerEndingBalance: ", winnerEndingBalance)
-
                               const endingTimeStamp = await raffle.getLastestTimeStamp()
-                              console.log("endingTimeStamp: ", endingTimeStamp)
-
                               const raffleEntranceFeeBigInt = BigInt(raffleEntranceFee)
                               const numberOfPlayers = await raffle.getNumberOfPlayers()
-                              console.log("numberOfPlayers: ", numberOfPlayers)
-
                               assert.equal(numberOfPlayers, 0)
-                              console.log("test6...")
-
                               assert.equal(recentWinner.toString(), accountAddress)
-                              console.log("test7...")
-
                               assert.equal(raffleState, 0)
-                              console.log("test8...")
-
                               assert(
                                   winnerEndingBalance <=
                                       winnerStartingBalance + raffleEntranceFeeBigInt
                               )
-                              console.log("test9...")
 
                               assert(endingTimeStamp > startingTimeStamp)
-                              console.log("test10...")
 
                               resolve("Very good!")
                           } catch (error) {

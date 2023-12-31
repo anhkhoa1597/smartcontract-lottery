@@ -28,10 +28,6 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
             vrfCoordinatorV2Mock.createSubscription().catch(reject)
         })
-        // const transactionResponse = await vrfCoordinatorV2Mock.createSubscription()
-        // const transactionReceipt = await transactionResponse.wait()
-        // subscriptionId = transactionReceipt.events[0].args.subId //lõi
-
         // Fund the subscription
         // Usually, you'd need the link token on a real network
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, VRF_SUB_FUND_AMOUNT)
@@ -61,6 +57,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
     // In latest version of Chainlink/contracts 0.6.1 or after 0.4.1, we need to add consumer explicitly after deployment of contract
     if (developmentChains.includes(network.name)) {
+        log("Adding consumer...")
         await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address)
         log("Consumer is added")
     }

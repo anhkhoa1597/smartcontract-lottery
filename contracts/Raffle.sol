@@ -2,9 +2,9 @@
 
 //Enter the lottery (paying some amount)
 
-// pick a random winner (verìiably random)
+// pick a random winner (verifiably random)
 
-// Winner to be selected every X minutes -> completely automated
+// Winner to be selected every X Minutes -> completely automated
 
 // Chainlink Oracle -> Randomness, Automated Excution (Chainlink keeper)
 
@@ -24,7 +24,7 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint25
 /**
  * @title A Raffle Contract
  * @author Đặng Anh Khoa
- * @notice Contract này để tạo một hợp đồng về trò chơi xổ số
+ * @notice Contract này để tạo một hợp đồng về trò chơi lô tô
  * @dev This implements the Chainlink VRF Version 2
  */
 contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
@@ -74,7 +74,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     function enterRaffle() public payable {
-        // require msg.value >= i_entranceFee, "Not enough ETH!"
+        // require(msg.value >= i_entranceFee, "Not enough ETH!")
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughETHEntered();
         }
@@ -84,6 +84,11 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_players.push(payable(msg.sender));
         //Events: Emit events khi có sự cập nhật của array hoặc mapping
         emit RaffleEnter(msg.sender);
+
+        // Bắt đầu đếm ngược khi có ít nhất 1 người chơi, những người sau đó vẫn không ảnh hưởng
+        if (s_players.length == 1) {
+            s_lastTimeStamp = block.timestamp;
+        }
     }
 
     /**
@@ -129,7 +134,6 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             i_callbackGasLimit,
             NUM_WORDS
         );
-        // Quiz... is this redundant?
         emit RequestedRaffleWinner(requestId);
     }
 
@@ -159,7 +163,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_recentWinner = recentWinner;
         s_raffleState = RaffleState.OPEN;
         s_players = new address payable[](0);
-        s_lastTimeStamp = block.timestamp;
+        // s_lastTimeStamp = block.timestamp;
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // require(success)
         if (!success) {

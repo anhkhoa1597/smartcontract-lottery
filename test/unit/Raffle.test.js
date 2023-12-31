@@ -2,6 +2,7 @@ const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 const { EventLog } = require("ethers")
+const { latest } = require("@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time")
 
 !developmentChains.includes(network.name)
     ? describe.skip
@@ -17,7 +18,6 @@ const { EventLog } = require("ethers")
               raffleContract = await ethers.getContract("Raffle") // Returns a new connection to the Raffle contract
               raffle = raffleContract.connect(player) // Returns a new instance of the Raffle contract connected to player
               raffleEntranceFee = await raffle.getEntranceFee()
-
               interval = await raffle.getInterval()
           })
 
@@ -153,7 +153,13 @@ const { EventLog } = require("ethers")
               })
           })
           describe("fulfillRandomWords", function () {
+              let startingTimeStamp
               beforeEach(async () => {
+                  startingTimeStamp = await raffle.getLastestTimeStamp()
+                  await network.provider.send("evm_increaseTime", [
+                      parseInt(interval.toString()) + 1,
+                  ])
+                  await network.provider.request({ method: "evm_mine", params: [] })
                   await raffle.enterRaffle({ value: raffleEntranceFee })
                   await network.provider.send("evm_increaseTime", [
                       parseInt(interval.toString()) + 1,
@@ -185,7 +191,7 @@ const { EventLog } = require("ethers")
                       raffle = raffleContract.connect(accounts[i]) // Returns a new instance of the Raffle contract connected to player
                       await raffle.enterRaffle({ value: raffleEntranceFee })
                   }
-                  const startingTimeStamp = await raffle.getLastestTimeStamp() // stores starting timestamp (before we fire our event)
+                  //   const startingTimeStamp = await raffle.getLastestTimeStamp() // stores starting timestamp (before we fire our event)
 
                   // This will be more important for our staging tests...
 
@@ -223,6 +229,8 @@ const { EventLog } = require("ethers")
                                       raffleEntranceFeeBigInt
                                   ).toString()
                               ) // Kiểm tra só tiền thắng có đúng chưa?
+                              console.log("starting: ", startingTimeStamp)
+                              console.log("ending: ", endingTimeStamp)
                               assert(endingTimeStamp > startingTimeStamp) // Kiểm tra Thời điểm kết thúc phiên tiếp theo phải lớn hơn thời điểm bắt đầu
                               resolve() // if try passes, resolves the promise
                           } catch (e) {
